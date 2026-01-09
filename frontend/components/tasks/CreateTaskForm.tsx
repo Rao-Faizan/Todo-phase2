@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { PlusIcon } from '@heroicons/react/24/outline';
 import { createTask } from '@/lib/api-client';
+import { toast } from 'sonner';
 
 interface CreateTaskFormProps {
   onTaskCreated: () => void;
@@ -12,6 +14,7 @@ export default function CreateTaskForm({ onTaskCreated }: CreateTaskFormProps) {
   const [description, setDescription] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,65 +46,92 @@ export default function CreateTaskForm({ onTaskCreated }: CreateTaskFormProps) {
       // Reset form
       setTitle('');
       setDescription('');
+      setIsOpen(false);
 
       // Notify parent component
       onTaskCreated();
+      toast.success('Task created successfully');
     } catch (err: any) {
       setError(err.message || 'An error occurred while creating the task');
+      toast.error('Failed to create task');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mb-8 p-6 bg-white rounded-lg shadow-md" aria-label="Create new task form">
-      <h2 className="text-xl font-semibold mb-4">Create New Task</h2>
-      {error && (
-        <div className="mb-4 p-2 bg-red-50 text-red-700 rounded-md" role="alert" aria-live="polite">
-          {error}
-        </div>
-      )}
-      <div className="grid grid-cols-1 gap-4">
-        <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-            Title *
-          </label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            maxLength={200}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            placeholder="Task title"
-            aria-describedby={error ? "create-task-error" : undefined}
-          />
-        </div>
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-            Description
-          </label>
-          <textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            maxLength={1000}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            placeholder="Task description (optional)"
-          />
-        </div>
+    <div className="mb-8">
+      {!isOpen ? (
         <button
-          type="submit"
-          disabled={loading}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md w-fit disabled:opacity-50"
-          aria-busy={loading}
+          onClick={() => setIsOpen(true)}
+          className="w-full flex items-center justify-center gap-2 bg-white dark:bg-dark-800/80 backdrop-blur-sm border border-dashed border-gray-300 dark:border-dark-600 rounded-2xl p-8 text-gray-500 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-700/50 transition-colors duration-300 group"
         >
-          {loading ? 'Creating...' : 'Create Task'}
+          <PlusIcon className="h-5 w-5 group-hover:scale-110 transition-transform" />
+          <span>Add new task</span>
         </button>
-      </div>
-      {error && <span id="create-task-error" className="sr-only">{error}</span>}
-    </form>
+      ) : (
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-dark-800/80 backdrop-blur-sm border border-gray-200 dark:border-dark-700 rounded-2xl p-6 shadow-lg" aria-label="Create new task form">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Create New Task</h2>
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-lg" role="alert" aria-live="polite">
+              {error}
+            </div>
+          )}
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-2">
+                Title *
+              </label>
+              <input
+                type="text"
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                maxLength={200}
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-dark-700/50 border border-gray-300 dark:border-dark-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                placeholder="What needs to be done?"
+                aria-describedby={error ? "create-task-error" : undefined}
+              />
+            </div>
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-2">
+                Description
+              </label>
+              <textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+                maxLength={1000}
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-dark-700/50 border border-gray-300 dark:border-dark-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                placeholder="Add details (optional)"
+              />
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-3 px-4 rounded-lg w-fit disabled:opacity-50 transition-colors duration-300 shadow-sm hover:shadow-md"
+                aria-busy={loading}
+              >
+                {loading ? 'Creating...' : 'Create Task'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  setError('');
+                }}
+                className="px-4 py-3 text-gray-600 dark:text-dark-300 hover:text-gray-800 dark:hover:text-white rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+          {error && <span id="create-task-error" className="sr-only">{error}</span>}
+        </form>
+      )}
+    </div>
   );
 }
