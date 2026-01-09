@@ -1,0 +1,36 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
+export default function ProtectedRoute({
+  children,
+  fallback = <div className="min-h-screen flex items-center justify-center">Loading...</div>
+}: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, checkAuthStatus } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        router.push('/signin');
+      }
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  if (isLoading) {
+    return fallback;
+  }
+
+  if (!isAuthenticated) {
+    return fallback;
+  }
+
+  return <>{children}</>;
+}
