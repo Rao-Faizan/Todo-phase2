@@ -62,7 +62,7 @@ export function TaskCard({ task, onTaskUpdated, onTaskDeleted }: TaskCardProps) 
 
   if (isEditing) {
     return (
-      <div className="bg-white dark:bg-dark-800/80 backdrop-blur-sm border border-gray-200 dark:border-dark-700 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+      <div className="bg-white/80 dark:bg-dark-800/70 backdrop-blur-[12px] border border-white/20 dark:border-dark-600/50 rounded-2xl p-6 shadow-lg shadow-dark-900/10 dark:shadow-dark-900/30 hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300">
         <EditTaskForm
           task={task}
           onEditSuccess={handleEditSuccess}
@@ -74,7 +74,7 @@ export function TaskCard({ task, onTaskUpdated, onTaskDeleted }: TaskCardProps) 
 
   return (
     <div
-      className={`bg-white dark:bg-dark-800/80 backdrop-blur-sm border border-gray-200 dark:border-dark-700 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] ${
+      className={`bg-white/80 dark:bg-dark-800/70 backdrop-blur-[12px] border border-white/20 dark:border-dark-600/50 rounded-2xl p-6 shadow-lg shadow-dark-900/10 dark:shadow-dark-900/30 hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 transform hover:scale-[1.02] ${
         task.completed ? 'opacity-70' : ''
       }`}
       onMouseEnter={() => setIsHovered(true)}
@@ -83,10 +83,10 @@ export function TaskCard({ task, onTaskUpdated, onTaskDeleted }: TaskCardProps) 
       <div className="flex items-start gap-4">
         <button
           onClick={handleToggleComplete}
-          className={`flex-shrink-0 mt-1 w-6 h-6 rounded-full flex items-center justify-center transition-colors ${
+          className={`flex-shrink-0 mt-1 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ${
             task.completed
-              ? 'bg-primary-500 text-white'
-              : 'border-2 border-gray-300 dark:border-dark-600 hover:border-primary-500'
+              ? 'bg-primary-500 text-white shadow-inner shadow-primary-500/30'
+              : 'border-2 border-white/30 dark:border-dark-600/50 bg-white/10 dark:bg-dark-700/30 backdrop-blur-sm hover:border-primary-500 hover:shadow-md hover:shadow-primary-500/20'
           }`}
           aria-label={task.completed ? 'Mark as incomplete' : 'Mark as complete'}
         >

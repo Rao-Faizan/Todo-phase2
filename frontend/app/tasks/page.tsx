@@ -102,27 +102,31 @@ export default function TasksPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-gray-50 dark:bg-dark-900">
-      <div className="absolute top-4 right-4">
+    <div className="relative min-h-screen">
+      <div className="absolute top-6 right-6 z-10">
         <ThemeToggle />
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-8">
+        <div className="bg-white/5 dark:bg-dark-800/20 backdrop-blur-lg border border-white/10 dark:border-dark-700/30 rounded-3xl p-8 shadow-xl shadow-dark-900/10 dark:shadow-dark-900/20">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">My Tasks</h1>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">My Tasks</h1>
+            <p className="text-gray-500 dark:text-dark-400 text-sm mt-1">Organize your day efficiently</p>
+          </div>
           <button
             onClick={() => {
               localStorage.removeItem('authToken');
               router.push('/signin');
             }}
-            className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-colors duration-300 shadow-sm hover:shadow-md"
+            className="bg-red-500/20 hover:bg-red-500/30 text-red-200 backdrop-blur-sm border border-red-500/30 py-2 px-4 rounded-full transition-all duration-300 shadow-sm shadow-red-500/20 hover:shadow-md hover:shadow-red-500/30"
           >
             Logout
           </button>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-xl">
+          <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 text-red-200 rounded-xl backdrop-blur-sm">
             {error}
           </div>
         )}
@@ -135,22 +139,22 @@ export default function TasksPage() {
         {/* Tasks List */}
         <div className="mt-8">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Your Tasks <span className="text-gray-500 dark:text-dark-400">({tasks.length})</span>
+            <h2 className="text-lg font-semibold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+              Your Tasks <span className="text-gray-400 dark:text-dark-400">({tasks.length})</span>
             </h2>
           </div>
 
           {loading ? (
             <div className="space-y-4" role="list" aria-label="Loading tasks">
               {[...Array(3)].map((_, index) => (
-                <div key={index} className="bg-white dark:bg-dark-800/80 backdrop-blur-sm border border-gray-200 dark:border-dark-700 rounded-2xl p-6 shadow-lg animate-pulse">
+                <div key={index} className="bg-white/80 dark:bg-dark-800/70 backdrop-blur-[12px] border border-white/20 dark:border-dark-600/50 rounded-2xl p-6 shadow-lg shadow-dark-900/10 dark:shadow-dark-900/30 animate-pulse">
                   <div className="flex items-start gap-4">
-                    <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-dark-700 mt-1"></div>
+                    <div className="w-6 h-6 rounded-full bg-gray-200/50 dark:bg-dark-700/50 mt-1"></div>
                     <div className="flex-1 space-y-3">
-                      <div className="h-5 bg-gray-200 dark:bg-dark-700 rounded w-3/4"></div>
-                      <div className="h-4 bg-gray-200 dark:bg-dark-700 rounded w-full"></div>
-                      <div className="h-4 bg-gray-200 dark:bg-dark-700 rounded w-2/3"></div>
-                      <div className="h-8 w-24 bg-gray-200 dark:bg-dark-700 rounded mt-4"></div>
+                      <div className="h-5 bg-gray-200/50 dark:bg-dark-700/50 rounded w-3/4"></div>
+                      <div className="h-4 bg-gray-200/50 dark:bg-dark-700/50 rounded w-full"></div>
+                      <div className="h-4 bg-gray-200/50 dark:bg-dark-700/50 rounded w-2/3"></div>
+                      <div className="h-8 w-24 bg-gray-200/50 dark:bg-dark-700/50 rounded mt-4"></div>
                     </div>
                   </div>
                 </div>
@@ -164,6 +168,7 @@ export default function TasksPage() {
             />
           )}
         </div>
+        </div> {/* Close glassmorphism container */}
       </div>
 
       <FloatingActionButton onClick={scrollToCreateForm} ariaLabel="Add new task" />

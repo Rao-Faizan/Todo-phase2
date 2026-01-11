@@ -64,13 +64,13 @@ export default function CreateTaskForm({ onTaskCreated }: CreateTaskFormProps) {
       {!isOpen ? (
         <button
           onClick={() => setIsOpen(true)}
-          className="w-full flex items-center justify-center gap-2 bg-white dark:bg-dark-800/80 backdrop-blur-sm border border-dashed border-gray-300 dark:border-dark-600 rounded-2xl p-8 text-gray-500 dark:text-dark-300 hover:bg-gray-50 dark:hover:bg-dark-700/50 transition-colors duration-300 group"
+          className="w-full flex items-center justify-center gap-2 bg-white/80 dark:bg-dark-800/70 backdrop-blur-[12px] border border-dashed border-white/30 dark:border-dark-600/50 rounded-2xl p-8 text-gray-500 dark:text-dark-300 hover:bg-white/90 dark:hover:bg-dark-700/80 transition-colors duration-300 group"
         >
           <PlusIcon className="h-5 w-5 group-hover:scale-110 transition-transform" />
           <span>Add new task</span>
         </button>
       ) : (
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-dark-800/80 backdrop-blur-sm border border-gray-200 dark:border-dark-700 rounded-2xl p-6 shadow-lg" aria-label="Create new task form">
+        <form onSubmit={handleSubmit} className="bg-white/80 dark:bg-dark-800/70 backdrop-blur-[12px] border border-white/20 dark:border-dark-600/50 rounded-2xl p-6 shadow-lg shadow-dark-900/10 dark:shadow-dark-900/30" aria-label="Create new task form">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Create New Task</h2>
           {error && (
             <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-lg" role="alert" aria-live="polite">

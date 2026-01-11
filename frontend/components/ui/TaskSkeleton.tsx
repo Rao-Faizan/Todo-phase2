@@ -1,6 +1,6 @@
 export function TaskSkeleton() {
   return (
-    <div className="bg-white dark:bg-dark-800/80 backdrop-blur-sm border border-gray-200 dark:border-dark-700 rounded-2xl p-6 shadow-lg animate-pulse">
+    <div className="bg-white/80 dark:bg-dark-800/70 backdrop-blur-[12px] border border-white/20 dark:border-dark-600/50 rounded-2xl p-6 shadow-lg shadow-dark-900/10 dark:shadow-dark-900/30 animate-pulse">
       <div className="flex items-start gap-4">
         <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-dark-700 mt-1"></div>
         <div className="flex-1 space-y-3">
