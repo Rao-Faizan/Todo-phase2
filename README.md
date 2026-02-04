@@ -42,7 +42,8 @@ npm install
 2. Install backend dependencies:
 ```bash
 cd backend
-pip install -r requirements.txt
+
+
 ```
 
 Or use the monorepo script:

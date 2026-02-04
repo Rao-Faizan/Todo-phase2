@@ -1,10 +1,10 @@
 import pytest
-from sqlmodel import Session, create_engine
+from sqlmodel import Session, create_engine, SQLModel
 from sqlmodel.pool import StaticPool
-from backend.services.task_service import create_task, get_tasks, get_task, update_task, delete_task, toggle_task_completion
-from backend.models.task import TaskCreate, TaskUpdate
-from backend.models.user import User, UserCreate
-from backend.services.auth_service import create_user
+from services.task_service import create_task, get_tasks, get_task, update_task, delete_task, toggle_task_completion
+from models.task import TaskCreate, TaskUpdate
+from models.user import User, UserCreate
+from services.auth_service import create_user
 from uuid import UUID
 
 # Create an in-memory SQLite database for testing
@@ -15,12 +15,12 @@ def session_fixture():
         connect_args={"check_same_thread": False},
         poolclass=StaticPool
     )
-    from backend.models.user import SQLModel
-    from backend.models.task import SQLModel as TaskSQLModel
+    from models.user import SQLModel
+    from models.task import SQLModel as TaskSQLModel
     # Import SQLModel from both to ensure all models are registered
 
     # We need to import the base SQLModel from user to register all models
-    from backend.models.user import SQLModel as BaseSQLModel
+    from models.user import SQLModel as BaseSQLModel
     BaseSQLModel.metadata.create_all(bind=engine)
 
     with Session(engine) as session:

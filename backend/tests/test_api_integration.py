@@ -2,11 +2,13 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, create_engine
 from sqlmodel.pool import StaticPool
-from backend.main import app
-from backend.database import get_session
-from backend.models.user import User
-from backend.models.task import Task
-from backend.services.auth_service import get_password_hash
+
+# Import test-specific app to avoid early database initialization
+from test_main import app
+from database import get_session
+from models.user import User
+from models.task import Task
+from services.auth_service import get_password_hash
 
 # Create an in-memory SQLite database for testing
 @pytest.fixture(name="session")
@@ -16,8 +18,8 @@ def session_fixture():
         connect_args={"check_same_thread": False},
         poolclass=StaticPool
     )
-    from backend.models.user import SQLModel as UserSQLModel
-    from backend.models.task import SQLModel as TaskSQLModel
+    from models.user import SQLModel as UserSQLModel
+    from models.task import SQLModel as TaskSQLModel
     # Import SQLModel from both to ensure all models are registered
     UserSQLModel.metadata.create_all(bind=engine)
 
@@ -50,8 +52,8 @@ def test_signup_endpoint(client: TestClient):
 def test_signin_endpoint(client: TestClient, session: Session):
     """Test the signin endpoint"""
     # First create a user
-    from backend.models.user import UserCreate
-    from backend.services.auth_service import create_user
+    from models.user import UserCreate
+    from services.auth_service import create_user
 
     user_data = UserCreate(email="testsignin@example.com", password="password123")
     user = create_user(user_data, session)

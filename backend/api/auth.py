@@ -17,10 +17,10 @@ router = APIRouter()
 
 @router.post("/signup", response_model=LoginResponse)
 @limiter.limit("100/minute")
-async def signup(request: Request, user_data: UserCreate, session: Session = Depends(get_session)):
+def signup(request: Request, user_data: UserCreate, session: Session = Depends(get_session)):
     """Create a new user account and return token"""
     try:
-        user = await create_user(user_data, session)
+        user = create_user(user_data, session)
 
         # Create JWT access token
         access_token_expires = timedelta(minutes=1440)  # 24 hours
@@ -35,9 +35,9 @@ async def signup(request: Request, user_data: UserCreate, session: Session = Dep
 
 @router.post("/signin", response_model=LoginResponse)
 @limiter.limit("100/minute")
-async def signin(request: Request, login_data: LoginRequest, session: Session = Depends(get_session)):
+def signin(request: Request, login_data: LoginRequest, session: Session = Depends(get_session)):
     """Authenticate user and return token"""
-    user = await authenticate_user(login_data.email, login_data.password, session)
+    user = authenticate_user(login_data.email, login_data.password, session)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 

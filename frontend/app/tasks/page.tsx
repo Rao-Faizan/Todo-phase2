@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+<<<<<<< Updated upstream
 import { Toaster, toast } from 'sonner';
 import { getUserTasks, createTask, updateTask, deleteTask, toggleTaskCompletion } from '@/lib/api-client';
 import { getUserIdFromToken } from '@/lib/auth-utils';
@@ -9,8 +10,17 @@ import CreateTaskForm from '@/components/tasks/CreateTaskForm';
 import TaskList from '@/components/tasks/TaskList';
 import { FloatingActionButton } from '@/components/ui/FloatingActionButton';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+=======
+import { getUserTasks } from '@/lib/api-client';
+import { getUserIdFromToken } from '@/lib/auth-utils';
+import CreateTaskForm from '@/components/tasks/CreateTaskForm';
+import TaskList from '@/components/tasks/TaskList';
+import ChatWidget from '@/components/chat/ChatWidget';
+import Navbar from '@/components/Navbar';
+import { Loader2 } from 'lucide-react';
+>>>>>>> Stashed changes
 
-interface Task {
+export interface Task {
   id: string;
   user_id: string;
   title: string;
@@ -29,14 +39,12 @@ export default function TasksPage() {
   const router = useRouter();
   const createFormRef = useRef<HTMLDivElement>(null);
 
-  // Get user ID from auth token
   useEffect(() => {
     const userId = getUserIdFromToken();
     if (!userId) {
       router.push('/signin');
       return;
     }
-
     setUserId(userId);
   }, [router]);
 
@@ -62,6 +70,7 @@ export default function TasksPage() {
     }
   };
 
+<<<<<<< Updated upstream
   const handleToggleComplete = async (task: Task) => {
     try {
       await toggleTaskCompletion(task.id, !task.completed);
@@ -87,6 +96,10 @@ export default function TasksPage() {
       }
     }
   };
+=======
+
+
+>>>>>>> Stashed changes
 
   const scrollToCreateForm = () => {
     createFormRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -94,14 +107,20 @@ export default function TasksPage() {
 
   if (loading) {
     return (
+<<<<<<< Updated upstream
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-900">
         <div className="text-xl text-gray-600 dark:text-dark-300">Loading tasks...</div>
         <Toaster position="bottom-right" />
+=======
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-primary-500 animate-spin" />
+>>>>>>> Stashed changes
       </div>
     );
   }
 
   return (
+<<<<<<< Updated upstream
     <div className="relative min-h-screen">
       <div className="absolute top-6 right-6 z-10">
         <ThemeToggle />
@@ -127,10 +146,25 @@ export default function TasksPage() {
 
         {error && (
           <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 text-red-200 rounded-xl backdrop-blur-sm">
+=======
+    <div className="min-h-screen bg-slate-900 pb-20 overflow-x-hidden">
+      {/* Re-use Navbar logic or create a dashboard specific one. For now, a custom header. */}
+      <Navbar />
+
+      <main className="max-w-5xl mx-auto px-4 py-8 pt-24">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">My Tasks</h1>
+          <p className="text-gray-400">Manage your daily goals and stay productive.</p>
+        </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl">
+>>>>>>> Stashed changes
             {error}
           </div>
         )}
 
+<<<<<<< Updated upstream
         <div ref={createFormRef}>
           {/* Create Task Form */}
           <CreateTaskForm onTaskCreated={fetchTasks} />
@@ -142,6 +176,34 @@ export default function TasksPage() {
             <h2 className="text-lg font-semibold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
               Your Tasks <span className="text-gray-400 dark:text-dark-400">({tasks.length})</span>
             </h2>
+=======
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Tasks List Wrapper */}
+            <div className="glass-card rounded-2xl p-6 border border-white/5">
+              <h2 className="text-xl font-semibold mb-6 flex items-center justify-between">
+                <span>Active Tasks</span>
+                <span className="text-xs px-2 py-1 bg-white/10 rounded-full text-gray-300">{tasks.length}</span>
+              </h2>
+              <TaskList
+                tasks={tasks}
+                onTaskUpdated={fetchTasks}
+                onTaskDeleted={fetchTasks}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="glass-card rounded-2xl p-6 border border-white/5 sticky top-24">
+              <h2 className="text-lg font-semibold mb-4 text-white">Add New Task</h2>
+              <CreateTaskForm onTaskCreated={fetchTasks} />
+            </div>
+
+            {/* Chat Widget Wrapper */}
+            <div className="glass-card rounded-2xl overflow-hidden border border-white/5">
+              <ChatWidget />
+            </div>
+>>>>>>> Stashed changes
           </div>
 
           {loading ? (
@@ -168,6 +230,7 @@ export default function TasksPage() {
             />
           )}
         </div>
+<<<<<<< Updated upstream
         </div> {/* Close glassmorphism container */}
       </div>
 
@@ -180,6 +243,9 @@ export default function TasksPage() {
         closeButton
         duration={3000}
       />
+=======
+      </main>
+>>>>>>> Stashed changes
     </div>
   );
 }

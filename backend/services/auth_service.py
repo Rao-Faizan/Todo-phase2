@@ -14,7 +14,7 @@ def get_password_hash(password: str) -> str:
     """Hash a plaintext password"""
     return pwd_context.hash(password)
 
-async def create_user(user_data: UserCreate, session: Session) -> User:
+def create_user(user_data: UserCreate, session: Session) -> User:
     """Create a new user with hashed password"""
     # Check if user already exists
     existing_user = session.query(User).filter(User.email == user_data.email).first()
@@ -40,7 +40,7 @@ async def create_user(user_data: UserCreate, session: Session) -> User:
 
     return db_user
 
-async def authenticate_user(email: str, password: str, session: Session) -> Optional[User]:
+def authenticate_user(email: str, password: str, session: Session) -> Optional[User]:
     """Authenticate user by email and password"""
     user = session.query(User).filter(User.email == email).first()
     if not user or not verify_password(password, user.password_hash):

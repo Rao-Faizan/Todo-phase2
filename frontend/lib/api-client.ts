@@ -88,16 +88,25 @@ const makeRequest = async <T>(
   return response.json();
 };
 
+export interface AuthResponse {
+  token: string;
+  message?: string;
+  user?: {
+    id: string;
+    email: string;
+  };
+}
+
 // Authentication functions
-export const signupUser = async (userData: SignupData) => {
-  return makeRequest('/api/auth/signup', {
+export const signupUser = async (userData: SignupData): Promise<AuthResponse> => {
+  return makeRequest<AuthResponse>('/api/auth/signup', {
     method: 'POST',
     body: JSON.stringify(userData),
   });
 };
 
-export const loginUser = async (loginData: LoginData) => {
-  return makeRequest('/api/auth/signin', {
+export const loginUser = async (loginData: LoginData): Promise<AuthResponse> => {
+  return makeRequest<AuthResponse>('/api/auth/signin', {
     method: 'POST',
     body: JSON.stringify(loginData),
   });
@@ -160,5 +169,16 @@ export const deleteTask = async (taskId: string) => {
   }
   return makeRequest(`/api/${userId}/tasks/${taskId}`, {
     method: 'DELETE',
+  });
+};
+
+export const sendChatMessage = async (message: string) => {
+  const userId = getUserIdFromToken();
+  if (!userId) {
+    throw new Error('User not authenticated');
+  }
+  return makeRequest<{ response: string; conversation_id: string }>(`/api/${userId}/chat`, {
+    method: 'POST',
+    body: JSON.stringify({ message }),
   });
 };

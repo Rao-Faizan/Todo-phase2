@@ -3,7 +3,11 @@
 import { useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { createTask } from '@/lib/api-client';
+<<<<<<< Updated upstream
 import { toast } from 'sonner';
+=======
+import { PlusCircle, Loader2 } from 'lucide-react';
+>>>>>>> Stashed changes
 
 interface CreateTaskFormProps {
   onTaskCreated: () => void;
@@ -60,6 +64,7 @@ export default function CreateTaskForm({ onTaskCreated }: CreateTaskFormProps) {
   };
 
   return (
+<<<<<<< Updated upstream
     <div className="mb-8">
       {!isOpen ? (
         <button
@@ -68,6 +73,53 @@ export default function CreateTaskForm({ onTaskCreated }: CreateTaskFormProps) {
         >
           <PlusIcon className="h-5 w-5 group-hover:scale-110 transition-transform" />
           <span>Add new task</span>
+=======
+    <form onSubmit={handleSubmit} className="mb-8" aria-label="Create new task form">
+      {error && (
+        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-sm" role="alert" aria-live="polite">
+          {error}
+        </div>
+      )}
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="title" className="block text-xs uppercase tracking-wider text-gray-400 mb-1">
+            Task Title
+          </label>
+          <input
+            type="text"
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            maxLength={200}
+            className="w-full bg-slate-800/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all placeholder:text-gray-600"
+            placeholder="What needs to be done?"
+            aria-describedby={error ? "create-task-error" : undefined}
+          />
+        </div>
+        <div>
+          <label htmlFor="description" className="block text-xs uppercase tracking-wider text-gray-400 mb-1">
+            Description
+          </label>
+          <textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            maxLength={1000}
+            className="w-full bg-slate-800/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all placeholder:text-gray-600 resize-none"
+            placeholder="Add details..."
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-primary-600 hover:bg-primary-500 text-white font-medium py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-busy={loading}
+        >
+          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <PlusCircle className="w-5 h-5" />}
+          {loading ? 'Adding...' : 'Add Task'}
+>>>>>>> Stashed changes
         </button>
       ) : (
         <form onSubmit={handleSubmit} className="bg-white/80 dark:bg-dark-800/70 backdrop-blur-[12px] border border-white/20 dark:border-dark-600/50 rounded-2xl p-6 shadow-lg shadow-dark-900/10 dark:shadow-dark-900/30" aria-label="Create new task form">

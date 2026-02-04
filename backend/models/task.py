@@ -4,24 +4,29 @@ from datetime import datetime
 from pydantic import BaseModel
 from uuid import UUID, uuid4
 import sqlalchemy.dialects.postgresql as pg
+from sqlalchemy import String, DateTime, Text
 from sqlmodel import Relationship
-from models.user import User
+from .user import User
 
 class TaskBase(SQLModel):
     title: str
     description: Optional[str] = None
     completed: bool = False
+    due_date: Optional[str] = None
+    priority: Optional[str] = "medium"
 
 class Task(TaskBase, table=True):
     __tablename__ = "tasks"
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     user_id: UUID = Field(foreign_key="users.id", ondelete="CASCADE", nullable=False)
-    title: str = Field(sa_column=Column(pg.VARCHAR(200), nullable=False))
-    description: Optional[str] = Field(sa_column=Column(pg.TEXT))
+    title: str = Field(sa_column=Column(String(200), nullable=False))
+    description: Optional[str] = Field(sa_column=Column(Text))
     completed: bool = Field(default=False)
-    created_at: datetime = Field(default=datetime.utcnow(), sa_column=Column(pg.TIMESTAMP(timezone=True)))
-    updated_at: datetime = Field(default=datetime.utcnow(), sa_column=Column(pg.TIMESTAMP(timezone=True)))
+    due_date: Optional[str] = Field(sa_column=Column(String(50), nullable=True))
+    priority: Optional[str] = Field(default="medium", sa_column=Column(String(20), nullable=True))
+    created_at: datetime = Field(default=datetime.utcnow(), sa_column=Column(DateTime))
+    updated_at: datetime = Field(default=datetime.utcnow(), sa_column=Column(DateTime))
 
     # Relationship to user
     user: Optional["User"] = Relationship(back_populates="tasks")
@@ -59,6 +64,8 @@ class TaskResponse(BaseModel):
     title: str
     description: Optional[str]
     completed: bool
+    due_date: Optional[str]
+    priority: Optional[str]
     created_at: datetime
     updated_at: datetime
 
@@ -73,6 +80,8 @@ class TaskResponse(BaseModel):
             title=task.title,
             description=task.description,
             completed=task.completed,
+            due_date=task.due_date,
+            priority=task.priority,
             created_at=task.created_at,
             updated_at=task.updated_at
         )

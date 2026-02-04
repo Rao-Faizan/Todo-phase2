@@ -1,9 +1,26 @@
 import pytest
-from sqlmodel import Session, create_engine
+from sqlmodel import Session, create_engine, SQLModel
 from sqlmodel.pool import StaticPool
-from backend.services.auth_service import create_user, authenticate_user
-from backend.models.user import UserCreate
-from backend.database import get_session
+from models.user import UserCreate, User
+from services.auth_service import create_user, authenticate_user
+from uuid import UUID
+import warnings
+from sqlalchemy.exc import SAWarning
+warnings.filterwarnings("ignore", category=SAWarning)
+
+# Create an in-memory SQLite database for testing
+@pytest.fixture(name="session")
+def session_fixture():
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool
+    )
+    # Only register User model for this test
+    User.metadata.create_all(bind=engine)
+
+    with Session(engine) as session:
+        yield session
 
 # Create an in-memory SQLite database for testing
 @pytest.fixture(name="session")

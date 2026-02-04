@@ -11,7 +11,6 @@
     "start": "concurrently \"cd backend && npm run start\" \"cd frontend && npm start\"",
     "install:frontend": "cd frontend && npm install",
     "install:backend": "cd backend && pip install -r requirements.txt",
-    "install": "npm run install:frontend && npm run install:backend",
     "test": "cd backend && pytest && cd ../frontend && npm run test"
   },
   "devDependencies": {

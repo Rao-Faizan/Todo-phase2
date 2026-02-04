@@ -23,10 +23,44 @@ services:
       - db
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/todo_db
-      - FRONTEND_URL=http://localhost:3000,http://localhost:3002
+      - FRONTEND_URL=http://localhost:3000,http://localhost:3001
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - MCP_API_KEY=${MCP_API_KEY}
+      - MCP_SERVER_URL=${MCP_SERVER_URL}
     ports:
       - "8000:8000"
     restart: unless-stopped
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: todo-frontend
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    restart: unless-stopped
+
+  mcp-server:
+    build:
+      context: ./mcp
+      dockerfile: Dockerfile
+    container_name: todo-mcp-server
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MCP_API_KEY=${MCP_API_KEY}
+      - DATABASE_URL=postgresql://user:password@db:5432/todo_db
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    restart: unless-stopped
 volumes:
   postgres_data:

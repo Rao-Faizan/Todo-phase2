@@ -4,6 +4,7 @@ from datetime import datetime
 from pydantic import BaseModel
 from uuid import UUID, uuid4
 import sqlalchemy.dialects.postgresql as pg
+from sqlalchemy import String, DateTime
 from sqlmodel import Relationship
 
 class UserBase(SQLModel):
@@ -13,10 +14,10 @@ class User(UserBase, table=True):
     __tablename__ = "users"
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    email: str = Field(sa_column=Column(pg.VARCHAR(255), unique=True, nullable=False))
-    password_hash: str = Field(sa_column=Column(pg.VARCHAR(255), nullable=False))
-    created_at: datetime = Field(default=datetime.utcnow(), sa_column=Column(pg.TIMESTAMP(timezone=True)))
-    updated_at: datetime = Field(default=datetime.utcnow(), sa_column=Column(pg.TIMESTAMP(timezone=True)))
+    email: str = Field(sa_column=Column(String(255), unique=True, nullable=False))
+    password_hash: str = Field(sa_column=Column(String(255), nullable=False))
+    created_at: datetime = Field(default=datetime.utcnow(), sa_column=Column(DateTime))
+    updated_at: datetime = Field(default=datetime.utcnow(), sa_column=Column(DateTime))
 
     # Relationship to tasks
     tasks: List["Task"] = Relationship(back_populates="user")

@@ -4,10 +4,10 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import ClientOnly from '@/components/ClientOnly';
 import { ThemeProvider } from 'next-themes';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata = {
-  title: 'Todo App',
+  title: 'TodoMaster',
   description: 'A secure task management application',
 };
 
@@ -17,17 +17,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen bg-gray-50 dark:bg-dark-900`} style={{ minHeight: '100vh' }}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true} disableTransitionOnChange>
-          <ClientOnly>
-            <AuthProvider>
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-screen">
-                {children}
-              </div>
-            </AuthProvider>
-          </ClientOnly>
-        </ThemeProvider>
+    <html lang="en">
+      <body className={`${inter.variable} font-sans min-h-screen bg-slate-900 text-white selection:bg-primary-500 selection:text-white`}>
+        <ClientOnly>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </ClientOnly>
       </body>
     </html>
   );
