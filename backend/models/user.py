@@ -21,6 +21,8 @@ class User(UserBase, table=True):
 
     # Relationship to tasks
     tasks: List["Task"] = Relationship(back_populates="user")
+    # Relationship to conversations
+    conversations: List["Conversation"] = Relationship(back_populates="user")
 
 class UserCreate(UserBase):
     email: str

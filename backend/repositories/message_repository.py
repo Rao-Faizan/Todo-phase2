@@ -1,7 +1,6 @@
 from typing import Optional, List
 from sqlmodel import Session, select
 from uuid import UUID
-from .base import BaseRepository
 from models.message import Message, MessageCreate, MessageUpdate
 from models.conversation import Conversation
 
