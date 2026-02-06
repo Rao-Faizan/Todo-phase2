@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api import auth, tasks
+from api import auth, tasks, chat
 import os
 from dotenv import load_dotenv
 from database import create_db_and_tables
@@ -18,13 +18,22 @@ app = FastAPI(title="Todo API", version="1.0.0")
 setup_rate_limiter(app)
 
 # CORS configuration
-frontend_urls = os.getenv("FRONTEND_URL", "http://localhost:3000,http://localhost:3002").split(",")
+frontend_urls = os.getenv("FRONTEND_URL", "http://localhost:3000").split(",")
 # Strip whitespace from each URL
 frontend_urls = [url.strip() for url in frontend_urls]
 
+# Add OpenAI ChatKit domains
+chatkit_domains = [
+    "https://chat.openai.com",  # Production ChatKit domain
+    "https://chatkit.openai.com",  # Alternative ChatKit domain (placeholder)
+]
+
+# Combine all allowed origins
+all_origins = frontend_urls + chatkit_domains
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=frontend_urls,
+    allow_origins=all_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -33,6 +42,7 @@ app.add_middleware(
 # Include API routes
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(tasks.router, prefix="/api/{user_id}", tags=["tasks"])
+app.include_router(chat.router, prefix="/api/{user_id}/chat", tags=["chat"])
 
 @app.get("/")
 def read_root():

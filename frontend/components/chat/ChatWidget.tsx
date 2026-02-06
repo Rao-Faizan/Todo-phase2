@@ -12,24 +12,64 @@ interface Message {
   timestamp: Date;
 }
 
-export default function ChatWidget() {
+interface ChatWidgetProps {
+  onTaskUpdate?: () => void;
+}
+
+export default function ChatWidget({ onTaskUpdate }: ChatWidgetProps) {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([
-    { id: '1', content: 'Hello! How can I help you with your tasks today?', role: 'assistant', timestamp: new Date() }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+
+  // Initialize conversation and history
+  useEffect(() => {
+    if (isAuthenticated && !authLoading) {
+      const savedConvId = localStorage.getItem('last_conversation_id');
+      if (savedConvId) {
+        setConversationId(savedConvId);
+        loadHistory(savedConvId);
+      } else {
+        // Initial greeting if no history
+        setMessages([
+          { id: '1', content: 'Hello! How can I help you with your tasks today?', role: 'assistant', timestamp: new Date() }
+        ]);
+      }
+    }
+  }, [isAuthenticated, authLoading]);
+
+  const loadHistory = async (id: string) => {
+    try {
+      const { getConversationHistory } = await import('@/lib/api-client');
+      const data = await getConversationHistory(id);
+      if (data.messages && data.messages.length > 0) {
+        const formattedMessages: Message[] = data.messages.map((msg: any) => ({
+          id: msg.id || Math.random().toString(),
+          content: msg.content,
+          role: msg.role,
+          timestamp: new Date(msg.created_at || Date.now())
+        }));
+        setMessages(formattedMessages);
+      } else {
+        setMessages([
+          { id: '1', content: 'Hello again! How can I help you today?', role: 'assistant', timestamp: new Date() }
+        ]);
+      }
+    } catch (error) {
+      console.error('Failed to load chat history:', error);
+      setMessages([
+        { id: '1', content: 'Hello! How can I help you today?', role: 'assistant', timestamp: new Date() }
+      ]);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const messageText = inputValue.trim();
-    if (!messageText || isLoading || !isAuthenticated) {
-      console.log('Chat submit blocked:', { messageText, isLoading, isAuthenticated });
-      return;
-    }
+    if (!messageText || isLoading || !isAuthenticated) return;
 
-    // Add user message immediately
     const userMessage: Message = {
       id: Date.now().toString(),
       content: messageText,
@@ -43,7 +83,12 @@ export default function ChatWidget() {
 
     try {
       const { sendChatMessage } = await import('@/lib/api-client');
-      const data = await sendChatMessage(messageText);
+      const data = await sendChatMessage(messageText, conversationId || undefined);
+
+      if (data.conversation_id) {
+        setConversationId(data.conversation_id);
+        localStorage.setItem('last_conversation_id', data.conversation_id);
+      }
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -52,6 +97,16 @@ export default function ChatWidget() {
         timestamp: new Date()
       };
       setMessages(prev => [...prev, aiMessage]);
+
+      // If the message seems to be task-related, refresh the task list
+      if (onTaskUpdate) {
+        const lowercaseMsg = (data.response || '').toLowerCase();
+        const taskKeywords = ['added', 'task', 'completed', 'updated', 'deleted', 'marked', 'removed', 'list updated'];
+        if (taskKeywords.some(kw => lowercaseMsg.includes(kw))) {
+          // Add a small delay for DB consistency if needed
+          setTimeout(() => onTaskUpdate(), 500);
+        }
+      }
     } catch (error: any) {
       console.error('Chat Error:', error);
       const errorMessage: Message = {
@@ -65,6 +120,7 @@ export default function ChatWidget() {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="flex flex-col h-[500px] bg-slate-800/50">

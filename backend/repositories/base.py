@@ -1,41 +1,49 @@
-"""Base repository class for common database operations"""
-
-from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, Optional, List
-from sqlmodel import Session
+from sqlmodel import Session, select
+from sqlmodel.sql.expression import SelectOfScalar
 from uuid import UUID
-
 
 T = TypeVar('T')
 
 
-class BaseRepository(Generic[T], ABC):
-    """Base repository class providing common database operations"""
-
-    def __init__(self, session: Session):
+class BaseRepository(Generic[T]):
+    def __init__(self, model: T, session: Session):
+        self.model = model
         self.session = session
 
-    @abstractmethod
-    def get_by_id(self, id: UUID) -> Optional[T]:
-        """Get entity by ID"""
-        pass
+    def get(self, id: UUID) -> Optional[T]:
+        """Get a record by ID"""
+        statement = select(self.model).where(self.model.id == id)
+        return self.session.exec(statement).first()
 
-    @abstractmethod
     def get_all(self, offset: int = 0, limit: int = 100) -> List[T]:
-        """Get all entities with pagination"""
-        pass
+        """Get all records with pagination"""
+        statement = select(self.model).offset(offset).limit(limit)
+        return self.session.exec(statement).all()
 
-    @abstractmethod
-    def create(self, entity: T) -> T:
-        """Create a new entity"""
-        pass
+    def create(self, obj: T) -> T:
+        """Create a new record"""
+        self.session.add(obj)
+        self.session.commit()
+        self.session.refresh(obj)
+        return obj
 
-    @abstractmethod
-    def update(self, id: UUID, entity: T) -> Optional[T]:
-        """Update an existing entity"""
-        pass
+    def update(self, id: UUID, obj_update: T) -> Optional[T]:
+        """Update a record by ID"""
+        obj = self.get(id)
+        if obj:
+            for key, value in obj_update.dict(exclude_unset=True).items():
+                setattr(obj, key, value)
+            self.session.add(obj)
+            self.session.commit()
+            self.session.refresh(obj)
+        return obj
 
-    @abstractmethod
     def delete(self, id: UUID) -> bool:
-        """Delete an entity"""
-        pass
+        """Delete a record by ID"""
+        obj = self.get(id)
+        if obj:
+            self.session.delete(obj)
+            self.session.commit()
+            return True
+        return False

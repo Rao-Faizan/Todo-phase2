@@ -18,6 +18,7 @@ from repositories.message_repository import MessageRepository
 from services.nlp.intent_detection_service import intent_detection_service, TaskIntent
 from services.nlp.task_extraction_service import task_extraction_service
 from datetime import datetime
+import google.generativeai as genai
 
 
 class AgentService:
@@ -29,6 +30,8 @@ class AgentService:
         self.task_repo = None
         self.conversation_repo = None
         self.message_repo = None
+        self.gemini_model = None
+        self.provider = None # 'openai' or 'gemini'
 
     async def process_message(
         self,
@@ -68,9 +71,8 @@ class AgentService:
                 if not conversation or conversation.user_id != user_id:
                     raise ValueError("Conversation not found or unauthorized")
 
-            # Initialize OpenAI/Gemini client for task extraction and general chat
-            if self.openai_client is None:
-                from openai import AsyncOpenAI
+            # Initialize AI client for task extraction and general chat
+            if self.openai_client is None and self.gemini_model is None:
                 import os
                 
                 # Check for Gemini API Key first
@@ -78,16 +80,18 @@ class AgentService:
                 openai_api_key = os.getenv("OPENAI_API_KEY")
                 
                 if gemini_api_key and "your-gemini-api-key" not in gemini_api_key:
-                    # Configure for Gemini (Google) via OpenAI SDK compatibility
-                    self.openai_client = AsyncOpenAI(
-                        api_key=gemini_api_key,
-                        base_url="https://generativelanguage.googleapis.com/v1beta/openai"
-                    )
-                    self.model_name = "gemini-1.5-flash"
+                    # Configure native Gemini
+                    genai.configure(api_key=gemini_api_key)
+                    self.gemini_model = genai.GenerativeModel("gemini-1.5-flash")
+                    self.provider = "gemini"
+                    print("Using Native Gemini provider")
                 elif openai_api_key and "your-openai-api-key" not in openai_api_key:
                     # Configure for standard OpenAI
+                    from openai import AsyncOpenAI
                     self.openai_client = AsyncOpenAI(api_key=openai_api_key)
                     self.model_name = "gpt-3.5-turbo"
+                    self.provider = "openai"
+                    print("Using OpenAI provider")
 
             # Save user message
             from models.message import MessageCreate
@@ -349,47 +353,41 @@ class AgentService:
     async def _get_openai_response(self, user_id: UUID, message_content: str, conversation_id: UUID, session: Session) -> str:
         """Get response from OpenAI for general conversation"""
         try:
-            # Check if client was initialized (should be done in process_message)
-            if self.openai_client is None:
-                 return (
-                    "I'm unable to process your request because the AI service is not configured properly. "
-                    "Please set a valid GEMINI_API_KEY or OPENAI_API_KEY in the .env file."
-                )
+            # System instruction
+            system_prompt = "You are a helpful assistant for managing tasks. You can help users add, list, complete, update, and delete tasks. If a user asks about tasks, try to identify their intent (add, list, complete, update, delete) and respond accordingly. Be friendly and concise."
 
             # Retrieve conversation history for context
             messages = self.message_repo.get_by_conversation(conversation_id)
 
-            # Format messages for OpenAI/Gemini
-            openai_messages = []
+            if self.provider == "gemini":
+                # Using Native Gemini
+                # Format history for Gemini as a single block for the prompt
+                history_text = "\n".join([f"{msg.role}: {msg.content}" for msg in messages])
+                full_prompt = f"{system_prompt}\n\nRecent History:\n{history_text}\n\nUser: {message_content}"
+                
+                # Use synchronous call if async is not available or buggy in this version
+                response = self.gemini_model.generate_content(full_prompt)
+                return response.text
 
-            # Add system message
-            openai_messages.append({
-                "role": "system",
-                "content": "You are a helpful assistant for managing tasks. You can help users add, list, complete, update, and delete tasks. If a user asks about tasks, try to identify their intent (add, list, complete, update, delete) and respond accordingly. Be friendly and concise."
-            })
+            elif self.provider == "openai":
+                # Standard OpenAI
+                openai_messages = []
+                openai_messages.append({"role": "system", "content": system_prompt})
+                
+                for msg in messages:
+                    openai_messages.append({"role": msg.role, "content": msg.content})
+                
+                openai_messages.append({"role": "user", "content": message_content})
 
-            # Add conversation history
-            for msg in messages:
-                openai_messages.append({
-                    "role": msg.role,
-                    "content": msg.content
-                })
-
-            # Add the current user message
-            openai_messages.append({
-                "role": "user",
-                "content": message_content
-            })
-
-            # Call OpenAI API (works for Gemini too via compatibility layer)
-            response = await self.openai_client.chat.completions.create(
-                model=self.model_name,
-                messages=openai_messages,
-                max_tokens=500,
-                temperature=0.7
-            )
-
-            return response.choices[0].message.content
+                response = await self.openai_client.chat.completions.create(
+                    model=self.model_name,
+                    messages=openai_messages,
+                    max_tokens=500,
+                    temperature=0.7
+                )
+                return response.choices[0].message.content
+            
+            return "I'm unable to process your request because the AI service is not configured properly."
 
         except Exception as e:
             return f"Sorry, I encountered an error processing your request: {str(e)}"

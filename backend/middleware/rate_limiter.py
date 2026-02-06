@@ -22,11 +22,7 @@ def setup_rate_limiter(app: FastAPI):
         if hasattr(route, 'endpoint') and route.endpoint.__name__ in ['swagger_ui_redirect', 'openapi']:
             continue
 
-        # Skip rate limiting for OPTIONS requests (needed for CORS preflight)
-        if hasattr(route, 'methods') and 'OPTIONS' in route.methods:
-            continue
-        # Apply rate limiting to all other methods
-        elif hasattr(route, 'methods') and 'GET' in route.methods:
+        if hasattr(route, 'methods') and 'GET' in route.methods:
             route.endpoint = limiter.limit("100/minute")(route.endpoint)
         elif hasattr(route, 'methods') and 'POST' in route.methods:
             route.endpoint = limiter.limit("100/minute")(route.endpoint)

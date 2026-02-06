@@ -25,8 +25,9 @@ class ChatResponse(BaseModel):
     message_id: Optional[UUID] = None
 
 
-@router.post("/chat", response_model=ChatResponse)
+@router.post("", response_model=ChatResponse)
 async def chat_endpoint(
+    user_id: UUID,
     token_data: dict = Depends(get_current_user),
     request: ChatRequest = None,
     session: Session = Depends(get_session)
@@ -70,6 +71,7 @@ async def chat_endpoint(
 
 @router.get("/conversations")
 async def get_user_conversations(
+    user_id: UUID,
     token_data: dict = Depends(get_current_user),
     session: Session = Depends(get_session)
 ):
@@ -95,6 +97,7 @@ async def get_user_conversations(
 
 @router.get("/conversations/{conversation_id}")
 async def get_conversation_history(
+    user_id: UUID,
     conversation_id: UUID,
     token_data: dict = Depends(get_current_user),
     session: Session = Depends(get_session)

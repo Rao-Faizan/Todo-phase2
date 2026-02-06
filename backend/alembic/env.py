@@ -1,4 +1,3 @@
-
 from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
@@ -11,9 +10,11 @@ from dotenv import load_dotenv
 # Add the backend directory to the path so we can import our models
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from backend.models.user import User
-from backend.models.task import Task
-from backend.database import DATABASE_URL
+from models.user import User
+from models.task import Task
+from models.conversation import Conversation
+from models.message import Message
+from database import DATABASE_URL
 
 # this is the Alembic Config object
 config = context.config

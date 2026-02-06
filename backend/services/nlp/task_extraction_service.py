@@ -27,7 +27,7 @@ class TaskExtractionService:
         Extract task details from a user message.
         If agent_service is provided, it uses the AI model for smarter extraction.
         """
-        if agent_service and agent_service.openai_client:
+        if agent_service:
             try:
                 # Use AI for extraction
                 prompt = f"""
@@ -36,27 +36,35 @@ class TaskExtractionService:
                 If a field is missing, use null.
                 """
                 
-                response = await agent_service.openai_client.chat.completions.create(
-                    model=agent_service.model_name,
-                    messages=[{"role": "user", "content": prompt}],
-                    max_tokens=200
-                )
+                content = None
+                if agent_service.provider == "gemini" and agent_service.gemini_model:
+                    response = agent_service.gemini_model.generate_content(prompt)
+                    content = response.text
+                elif agent_service.provider == "openai" and agent_service.openai_client:
+                    response = await agent_service.openai_client.chat.completions.create(
+                        model=agent_service.model_name,
+                        messages=[{"role": "user", "content": prompt}],
+                        max_tokens=200
+                    )
+                    content = response.choices[0].message.content
                 
-                content = response.choices[0].message.content
-                import json
-                # Handle potential markdown code blocks
-                if "```json" in content:
-                    content = content.split("```json")[1].split("```")[0].strip()
-                elif "```" in content:
-                    content = content.split("```")[1].split("```")[0].strip()
-                    
-                data = json.loads(content)
-                return ExtractedTask(
-                    title=data.get("title"),
-                    description=data.get("description"),
-                    due_date=data.get("due_date"),
-                    priority=data.get("priority")
-                )
+                if content:
+                    import json
+                    # Handle potential markdown code blocks
+                    if "```json" in content:
+                        content = content.split("```json")[1].split("```")[0].strip()
+                    elif "```" in content:
+                        content = content.split("```")[1].split("```")[0].strip()
+                    elif content.strip().startswith("{") and content.strip().endswith("}"):
+                        pass # Valid JSON probably
+                        
+                    data = json.loads(content)
+                    return ExtractedTask(
+                        title=data.get("title"),
+                        description=data.get("description"),
+                        due_date=data.get("due_date"),
+                        priority=data.get("priority")
+                    )
             except Exception as e:
                 print(f"AI Extraction failed: {e}, falling back to regex.")
         

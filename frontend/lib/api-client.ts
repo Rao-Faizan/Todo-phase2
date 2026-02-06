@@ -172,13 +172,29 @@ export const deleteTask = async (taskId: string) => {
   });
 };
 
-export const sendChatMessage = async (message: string) => {
+export const sendChatMessage = async (message: string, conversation_id?: string) => {
   const userId = getUserIdFromToken();
   if (!userId) {
     throw new Error('User not authenticated');
   }
   return makeRequest<{ response: string; conversation_id: string }>(`/api/${userId}/chat`, {
     method: 'POST',
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, conversation_id }),
   });
+};
+
+export const getConversations = async () => {
+  const userId = getUserIdFromToken();
+  if (!userId) {
+    throw new Error('User not authenticated');
+  }
+  return makeRequest<{ conversations: any[] }>(`/api/${userId}/chat/conversations`);
+};
+
+export const getConversationHistory = async (conversationId: string) => {
+  const userId = getUserIdFromToken();
+  if (!userId) {
+    throw new Error('User not authenticated');
+  }
+  return makeRequest<{ conversation_id: string; messages: any[] }>(`/api/${userId}/chat/conversations/${conversationId}`);
 };
